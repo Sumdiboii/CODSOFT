@@ -1,0 +1,306 @@
+#include <iostream>
+#include <list>
+#include <algorithm>
+using namespace std;
+
+class T{
+    
+public:
+
+    char board[9]={' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
+    char current='O';
+    char winner=' '; 
+    int state=-1;   
+
+    list<int>move_stack;
+    
+    friend class ai;
+    friend void play(T game);
+    
+    void display(const string& name, const string& language, const string& internship, const string& company, const string& task) 
+    {
+        cout<<"-->Name: "<<name<<endl;
+        cout<<"-->Language: "<<language<< endl;
+        cout<<"-->Internship of: "<<internship<<endl;
+        cout<<"-->Internship at: "<<company<<endl;
+        cout<<"-->Task: "<<task<<endl;
+    }
+    
+    void print() const
+    {   
+        cout<<"\n"<<endl;
+    
+        for(int i = 0;i < 9;++i)
+        {
+            if(i%3)
+            {
+                cout<<" | ";
+            }
+            cout<<board[i];
+        
+            if(i==2||i==5)
+            {
+                cout<<"\n";
+                cout<<"---------"<<"\n";
+            }
+        }
+        cout<<"\n";
+    }
+
+    void swap()
+    {
+        current=(current=='X')?'O':'X';    //TURNARY OP
+    }
+
+    int play(int index)
+    {
+        if(index>=0&&index<9)
+        {
+            if(board[index]==' ')
+            {
+                board[index]=current;
+                move_stack.push_back(index);
+                update();
+                swap();
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    void undo()
+    {
+        int move=move_stack.back();
+        board[move]=' ';
+        move_stack.pop_back();
+        update();
+        swap();
+    
+    }
+
+    list<int>getmoves()
+    {
+        list<int> posmoves;
+        for(int i=0;i<9;++i)
+        {
+            bool found=(find(move_stack.begin(),move_stack.end(),i)!=move_stack.end());
+        
+            if(!found)
+            {
+                posmoves.push_back(i);
+            }
+        }
+    
+        return posmoves;
+    }
+
+    void update()
+    {
+        if(
+            // check for horizontal 
+            (board[3] == current && board[4] == current && board[5] == current) ||
+            (board[0] == current && board[1] == current && board[2] == current) ||
+            (board[6] == current && board[7] == current && board[8] == current) ||
+        
+             // check for vertical 
+            (board[0] == current && board[3] == current && board[6] == current) ||
+            (board[1] == current && board[4] == current && board[7] == current) ||
+            (board[2] == current && board[5] == current && board[8] == current) ||
+        
+            // check for diagonal
+            (board[0] == current && board[4] == current && board[8] == current) ||
+            (board[2] == current && board[4] == current && board[6] == current))
+        
+        {
+            state=1;
+            winner=current;
+        }
+        else
+        {
+            bool draw=true;
+            for(int i=0;i<9;++i)
+            {
+                if(board[i]==' ')
+                {
+                    draw=false;
+                    break;
+                }
+            }
+        
+            if (draw)
+            {
+                state=0;
+            }
+            else
+            {
+                winner=' ';
+                state=-1;
+            }
+        }
+    }
+
+};
+
+
+class ai{
+    
+public:
+
+    int min(T board,char max_sym,int depth)
+    {
+        if(board.state==1)
+        {
+            if(board.winner==max_sym)
+            {
+                return 10-depth;
+            }
+            else
+            {
+                return -10+depth;
+            }
+        }
+        else if(board.state==0)
+        {
+            return 0;
+        }
+
+        int bestscore=100;
+
+        for(auto move:board.getmoves())
+        {
+            board.play(move);
+            int score=ai::max(board,max_sym,depth + 1);
+        
+            if(score<bestscore)
+            {
+                bestscore = score;
+            }
+            board.undo();
+        }
+        return bestscore;
+    }
+    
+    int max(T board,char max_sym,int depth)
+    {
+        if(board.state == 1)
+         {
+            if(board.winner==max_sym)
+            {
+                return 10-depth;
+            }
+            else
+            {
+                return -10+depth;
+            }
+        }
+        else if(board.state==0)
+        {
+            return 0;
+        }
+
+        int bestscore = -100;
+
+        for(auto move:board.getmoves())
+        {
+            board.play(move);
+            int score=ai::min(board,max_sym,depth + 1);
+        
+            if (score>bestscore)
+            {
+                bestscore=score;
+            }
+            board.undo();
+        }
+         return bestscore;
+    }
+
+    int minmax(T board, char max_sym)
+    {
+        int bestscore=-100;
+        int bestmove=-1; 
+
+        for(auto move:board.getmoves())
+        {
+            board.play(move);
+            int score = ai::min(board,max_sym,0);
+        
+        if(score>bestscore)
+        {
+            bestscore=score;
+            bestmove=move;
+        }
+        
+        board.undo();
+    }
+
+    return bestmove;
+}
+
+    
+};
+
+void play(T game)
+{
+    bool crntplaying=true;
+    int count=0;
+    int move;
+    ai AI;
+
+    while(crntplaying)
+    {
+        game.print();
+        
+        if(count%2==1)
+        {
+            move=AI.minmax(game,game.current);
+        } 
+        else
+        {
+            cout << "\nWhat will your move be [1 to 9 horizontally throughout all 3 columns]\n";
+            cin >> move;
+            
+            if(!cin) 
+            {
+                cerr << "You have made an Error whilst entering the input\n";
+                return;
+            }
+            --move;
+        }
+
+        if(game.play(move)==0)
+        {
+            cout << "The spot is already occupied\n";
+            continue;
+        }
+
+        if(game.state==1)
+        {
+            game.print();
+            cout<<game.winner<<" HAS WON THE GAME !!!\n";
+            
+            crntplaying=false;
+        } 
+        
+        else if(game.state==0)
+        {
+            game.print();
+            cout<<"LMAO ITS A DRAW!!!\n";
+            
+            crntplaying=false;
+        };
+        ++count;
+    };
+};
+
+
+
+int main()
+{
+    T game;
+    game.display("Sumedh", "C++", "Artificial Intelligence", "Codsoft", "Task 1");
+    play(game);
+    return 0;
+}
+
+
+
