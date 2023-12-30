@@ -1,0 +1,104 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+class Codsoft{
+public:
+
+    Codsoft(){}
+    
+    void display(const string& name, const string& language, const string& internship, const string& company, const string& task) 
+    {
+        cout<<"-->Name: "<<name<<endl;
+        cout<<"-->Language: "<<language<< endl;
+        cout<<"-->Internship of: "<<internship<<endl;
+        cout<<"-->Internship at: "<<company<<endl;
+        cout<<"-->Task: "<<task<<endl;
+    }
+
+    string lowercase(string input)
+    {
+        transform(input.begin(), input.end(), input.begin(), ::tolower);
+        return input;
+    }
+
+    void chatbot(const string& question) 
+    {
+        string query = lowercase(question);
+
+        if(query.find("hello")!=string::npos||query.find("hi")!=string::npos)
+        {
+            cout<<"CB-->Hello! How can I help you?\n";
+        } 
+        
+        else if(query.find("how are you")!=string::npos||query.find("how have you been")!=string::npos||
+                  query.find("whats up")!=string::npos) 
+                   {
+            cout<<"CB-->I am doing great!! How about you?\n";
+        } 
+        
+        else if(query.find("i am fine")!=string::npos||query.find("i am doing great")!= string::npos)
+        {
+            cout<<"CB-->Glad to hear that! How can I help you?\n";
+        } 
+        
+        else if(query.find("i am bored")!=string::npos||query.find("i am not good")!=string::npos||
+                  query.find("i am sad")!=string::npos) 
+                   {
+            cout<<"CB-->Sorry to hear that.. Can I help you in any way?\n";
+        } 
+        else if(query.find("what is codsoft")!=string::npos||query.find("codsoft")!=string::npos) 
+        {
+            cout<<"CB-->Codoft is a company that provides great virtual internship opportunities to students!\n";
+        } 
+        
+        else if(query.find("bye")!=string::npos||query.find("goodbye")!=string::npos) 
+        {
+            cout<<"CB-->Goodbye! Have a great day!\n";
+        } 
+        
+        else 
+        {
+            cout<<"CB-->I'm sorry, I didn't understand that. Can you please rephrase?\n";
+        }
+    }
+};
+
+int main() 
+{
+    Codsoft ai;
+    ai.display("Sumedh", "C++", "Artificial Intelligence", "Codsoft", "Task 1");
+    
+
+    cout<<"\t\t\t\t\t\tWelcome to the Simple Rule-Based Chatbot!\n\n";
+    cout<<"You can start chatting. Type 'bye', 'exit', 'i am done' to stop.\n";
+
+    string question;
+    
+    while(true) 
+    {
+        cout<<"You: ";
+        getline(cin, question);
+
+        ai.chatbot(question);
+
+        if(ai.lowercase(question) == "bye" || ai.lowercase(question) == "exit" || ai.lowercase(question) == "i am done")
+        {
+            break;
+        }
+    }
+
+    cout<<"Chatbot: Goodbye! Thanks for chatting with me.\n";
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
